@@ -11,8 +11,7 @@ class PostsSpider(scrapy.Spider):
         extractor = LinkExtractor(allow_domains='s2wlab.com')
         links = extractor.extract_links(response)
         for link in links:
-            self.start_urls.append(link.url)
-        print(self.start_urls)
+            yield Request(link.url, callback=self.parse)
         # count = 0
         # for link in links:
         #     filename = 'posts' + str(count) + '.html'
