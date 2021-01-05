@@ -1,6 +1,7 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
+import os
 class PostsSpider(scrapy.Spider):
     name = "posts"
     allowed_domains = ["www.s2wlab.com"]
@@ -16,6 +17,11 @@ class PostsSpider(scrapy.Spider):
             yield Request(link.url, callback=self.parse_page)  
  
     def parse_page(self, response):
+        for script in response.xpath('//script/@src').getall():
+            # print(script)
+            yield Request(response.urljoin(script), callback=self.parse_script)
+        for image in response.xpath('//image/@src').getall():
+            yield Request(response.urljoin(image), callback=self.parse_image)
         page = response.url.split('/')[-1]
         if page.split('.')[-1] != 'html':
             page = 'home.html'
@@ -23,6 +29,27 @@ class PostsSpider(scrapy.Spider):
         self.count += 1
         with open(page, 'wb') as f:
             f.write(response.body)
+    
+    def parse_image(self, response):
+        page = response.url.split('/')[-1]
+        page = './image/' + page
+        with open(page, 'wb') as f:
+            f.write(response.body)
+
+    def parse_script(self, response):
+        folder = response.url.split('/')[-2]
+        page = './' + folder + '/' + response.url.split('/')[-1]
+    
+        try:
+            with open(page, 'wb') as f:
+                f.write(response.body)
+        except:
+            os.mkdir(folder)
+            with open(page, 'wb') as f:
+                f.write(response.body)
+
+            
+
         
         
         # count = 0
