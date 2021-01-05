@@ -1,17 +1,30 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
+from scrapy import Request
 class PostsSpider(scrapy.Spider):
     name = "posts"
     allowed_domains = ["www.s2wlab.com"]
     start_urls = [
         "https://www.s2wlab.com/index.html"
     ]
+    count = len(start_urls)
 
     def parse(self, response):
-        extractor = LinkExtractor(allow_domains='s2wlab.com')
+        extractor = LinkExtractor(allow_domains = 's2wlab.com')
         links = extractor.extract_links(response)
         for link in links:
-            yield Request(link.url, callback=self.parse)
+            yield Request(link.url, callback=self.parse_page)  
+ 
+    def parse_page(self, response):
+        page = response.url.split('/')[-1]
+        if page.split('.')[-1] != 'html':
+            page = 'home.html'
+        #filename = 'posts' + str(self.count) + '.html'
+        self.count += 1
+        with open(page, 'wb') as f:
+            f.write(response.body)
+        
+        
         # count = 0
         # for link in links:
         #     filename = 'posts' + str(count) + '.html'
