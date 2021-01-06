@@ -22,7 +22,7 @@ class PostsSpider(scrapy.Spider):
         for script in response.xpath('//script/@src').getall():
             # print(script)
             yield Request(response.urljoin(script), callback=self.parse_script)
-        for image in response.xpath('//image/@src'):
+        for image in response.xpath('//img/@src').getall():
             print(image)
             yield Request(response.urljoin(image), callback=self.parse_script)
         for link in response.xpath("//link[@rel='stylesheet']/@href").getall():
